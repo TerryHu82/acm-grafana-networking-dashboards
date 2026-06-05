@@ -1,0 +1,264 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: observability-metrics-custom-allowlist
+  namespace: open-cluster-management-observability
+data:
+  metrics_list.yaml: "names:\n  - ovnkube_node_cni_request_duration_seconds_count\n\
+    \  - ovnkube_node_cni_request_duration_seconds_bucket\n  - pod_network_connectivity_check_tcp_connect_latency_gauge\n\
+    \  - container_cpu_usage_seconds_total\n  - container_memory_rss\n  - haproxy_server_bytes_in_total\n\
+    \  - haproxy_server_bytes_out_total\n  - haproxy_server_http_responses_total\n\
+    \  - haproxy_server_http_average_response_latency_milliseconds\n  - haproxy_server_up\n"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: networking-ingress-dashboard
+  namespace: open-cluster-management-observability
+  labels:
+    grafana-custom-dashboard: 'true'
+  annotations:
+    observability.open-cluster-management.io/dashboard-folder: Networking
+data:
+  networking-ingress.json: "{\n  \"uid\": \"networking-ingress-acm\",\n  \"title\"\
+    : \"Networking / Ingress\",\n  \"tags\": [\n    \"openshift\",\n    \"networking\"\
+    ,\n    \"ingress\",\n    \"haproxy\",\n    \"acm\"\n  ],\n  \"timezone\": \"browser\"\
+    ,\n  \"schemaVersion\": 36,\n  \"version\": 1,\n  \"refresh\": \"30s\",\n  \"\
+    time\": {\n    \"from\": \"now-1h\",\n    \"to\": \"now\"\n  },\n  \"templating\"\
+    : {\n    \"list\": [\n      {\n        \"current\": {\n          \"selected\"\
+    : false,\n          \"text\": \"Observatorium\",\n          \"value\": \"Observatorium\"\
+    \n        },\n        \"description\": null,\n        \"error\": null,\n     \
+    \   \"hide\": 2,\n        \"includeAll\": false,\n        \"label\": null,\n \
+    \       \"multi\": false,\n        \"name\": \"datasource\",\n        \"options\"\
+    : [],\n        \"query\": \"prometheus\",\n        \"refresh\": 2,\n        \"\
+    regex\": \"\",\n        \"skipUrlSync\": false,\n        \"type\": \"datasource\"\
+    \n      },\n      {\n        \"allValue\": null,\n        \"current\": {\n   \
+    \       \"selected\": false,\n          \"text\": \"name\",\n          \"value\"\
+    : \"name\"\n        },\n        \"datasource\": null,\n        \"definition\"\
+    : \"label_values(acm_label_names, label_name)\",\n        \"description\": null,\n\
+    \        \"error\": null,\n        \"hide\": 0,\n        \"includeAll\": false,\n\
+    \        \"label\": \"Label\",\n        \"multi\": false,\n        \"name\": \"\
+    acm_label_names\",\n        \"options\": [],\n        \"query\": {\n         \
+    \ \"query\": \"label_values(acm_label_names, label_name)\",\n          \"refId\"\
+    : \"StandardVariableQuery\"\n        },\n        \"refresh\": 1,\n        \"regex\"\
+    : \"\",\n        \"skipUrlSync\": false,\n        \"sort\": 1,\n        \"type\"\
+    : \"query\"\n      },\n      {\n        \"allValue\": null,\n        \"current\"\
+    : {\n          \"selected\": false,\n          \"text\": \"All\",\n          \"\
+    value\": \"$__all\"\n        },\n        \"datasource\": null,\n        \"definition\"\
+    : \"label_values(acm_managed_cluster_labels, $acm_label_names)\",\n        \"\
+    description\": null,\n        \"error\": null,\n        \"hide\": 0,\n       \
+    \ \"includeAll\": true,\n        \"label\": \"Value\",\n        \"multi\": true,\n\
+    \        \"name\": \"value\",\n        \"options\": [],\n        \"query\": {\n\
+    \          \"query\": \"label_values(acm_managed_cluster_labels, $acm_label_names)\"\
+    ,\n          \"refId\": \"StandardVariableQuery\"\n        },\n        \"refresh\"\
+    : 1,\n        \"regex\": \"\",\n        \"skipUrlSync\": false,\n        \"sort\"\
+    : 0,\n        \"type\": \"query\"\n      },\n      {\n        \"allValue\": null,\n\
+    \        \"current\": {\n          \"selected\": true,\n          \"text\": [\n\
+    \            \"All\"\n          ],\n          \"value\": [\n            \"$__all\"\
+    \n          ]\n        },\n        \"datasource\": null,\n        \"definition\"\
+    : \"label_values(acm_managed_cluster_labels{$acm_label_names=~\\\"$value\\\"},\
+    \ name)\",\n        \"description\": null,\n        \"error\": null,\n       \
+    \ \"hide\": 2,\n        \"includeAll\": true,\n        \"label\": \"Cluster\"\
+    ,\n        \"multi\": true,\n        \"name\": \"cluster\",\n        \"options\"\
+    : [],\n        \"query\": {\n          \"query\": \"label_values(acm_managed_cluster_labels{$acm_label_names=~\\\
+    \"$value\\\"}, name)\",\n          \"refId\": \"StandardVariableQuery\"\n    \
+    \    },\n        \"refresh\": 1,\n        \"regex\": \"\",\n        \"skipUrlSync\"\
+    : false,\n        \"sort\": 0,\n        \"type\": \"query\"\n      }\n    ]\n\
+    \  },\n  \"panels\": [\n    {\n      \"id\": 1,\n      \"type\": \"row\",\n  \
+    \    \"title\": \"Default\",\n      \"gridPos\": {\n        \"h\": 1,\n      \
+    \  \"w\": 24,\n        \"x\": 0,\n        \"y\": 0\n      },\n      \"collapsed\"\
+    : false,\n      \"panels\": []\n    },\n    {\n      \"id\": 2,\n      \"type\"\
+    : \"stat\",\n      \"title\": \"Current Total Incoming Bandwidth\",\n      \"\
+    datasource\": \"$datasource\",\n      \"gridPos\": {\n        \"h\": 6,\n    \
+    \    \"w\": 6,\n        \"x\": 0,\n        \"y\": 1\n      },\n      \"targets\"\
+    : [\n        {\n          \"refId\": \"A\",\n          \"expr\": \"sum by (cluster)\
+    \ (rate(haproxy_server_bytes_in_total{cluster=~\\\"$cluster\\\"}[10m]))\",\n \
+    \         \"datasource\": \"$datasource\",\n          \"legendFormat\": \"{{cluster}}\"\
+    \n        }\n      ],\n      \"options\": {\n        \"reduceOptions\": {\n  \
+    \        \"values\": false,\n          \"calcs\": [\n            \"lastNotNull\"\
+    \n          ],\n          \"fields\": \"\"\n        },\n        \"orientation\"\
+    : \"auto\",\n        \"textMode\": \"auto\",\n        \"colorMode\": \"value\"\
+    ,\n        \"graphMode\": \"area\",\n        \"justifyMode\": \"auto\"\n     \
+    \ },\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\": \"\
+    Bps\"\n        },\n        \"overrides\": []\n      }\n    },\n    {\n      \"\
+    id\": 3,\n      \"type\": \"stat\",\n      \"title\": \"Current Total Outgoing\
+    \ Bandwidth\",\n      \"datasource\": \"$datasource\",\n      \"gridPos\": {\n\
+    \        \"h\": 6,\n        \"w\": 6,\n        \"x\": 6,\n        \"y\": 1\n \
+    \     },\n      \"targets\": [\n        {\n          \"refId\": \"A\",\n     \
+    \     \"expr\": \"sum by (cluster) (rate(haproxy_server_bytes_out_total{cluster=~\\\
+    \"$cluster\\\"}[10m]))\",\n          \"datasource\": \"$datasource\",\n      \
+    \    \"legendFormat\": \"{{cluster}}\"\n        }\n      ],\n      \"options\"\
+    : {\n        \"reduceOptions\": {\n          \"values\": false,\n          \"\
+    calcs\": [\n            \"lastNotNull\"\n          ],\n          \"fields\": \"\
+    \"\n        },\n        \"orientation\": \"auto\",\n        \"textMode\": \"auto\"\
+    ,\n        \"colorMode\": \"value\",\n        \"graphMode\": \"area\",\n     \
+    \   \"justifyMode\": \"auto\"\n      },\n      \"fieldConfig\": {\n        \"\
+    defaults\": {\n          \"unit\": \"Bps\"\n        },\n        \"overrides\"\
+    : []\n      }\n    },\n    {\n      \"id\": 4,\n      \"type\": \"stat\",\n  \
+    \    \"title\": \"HTTP Error Rate\",\n      \"datasource\": \"$datasource\",\n\
+    \      \"gridPos\": {\n        \"h\": 6,\n        \"w\": 6,\n        \"x\": 12,\n\
+    \        \"y\": 1\n      },\n      \"targets\": [\n        {\n          \"refId\"\
+    : \"A\",\n          \"expr\": \"sum by (cluster) (increase(haproxy_server_http_responses_total{cluster=~\\\
+    \"$cluster\\\",code=~\\\"4xx|5xx\\\", route!=\\\"\\\"}[10m])) / sum by (cluster)\
+    \ (increase(haproxy_server_http_responses_total{cluster=~\\\"$cluster\\\",route!=\\\
+    \"\\\"}[10m]))\",\n          \"datasource\": \"$datasource\",\n          \"legendFormat\"\
+    : \"{{cluster}}\"\n        }\n      ],\n      \"options\": {\n        \"reduceOptions\"\
+    : {\n          \"values\": false,\n          \"calcs\": [\n            \"lastNotNull\"\
+    \n          ],\n          \"fields\": \"\"\n        },\n        \"orientation\"\
+    : \"auto\",\n        \"textMode\": \"auto\",\n        \"colorMode\": \"value\"\
+    ,\n        \"graphMode\": \"area\",\n        \"justifyMode\": \"auto\"\n     \
+    \ },\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\": \"\
+    percentunit\"\n        },\n        \"overrides\": []\n      }\n    },\n    {\n\
+    \      \"id\": 5,\n      \"type\": \"stat\",\n      \"title\": \"HTTP Server Average\
+    \ Response Latency\",\n      \"datasource\": \"$datasource\",\n      \"gridPos\"\
+    : {\n        \"h\": 6,\n        \"w\": 6,\n        \"x\": 18,\n        \"y\":\
+    \ 1\n      },\n      \"targets\": [\n        {\n          \"refId\": \"A\",\n\
+    \          \"expr\": \"avg by (cluster) (haproxy_server_http_average_response_latency_milliseconds{cluster=~\\\
+    \"$cluster\\\"} != 0)\",\n          \"datasource\": \"$datasource\",\n       \
+    \   \"legendFormat\": \"{{cluster}}\"\n        }\n      ],\n      \"options\"\
+    : {\n        \"reduceOptions\": {\n          \"values\": false,\n          \"\
+    calcs\": [\n            \"lastNotNull\"\n          ],\n          \"fields\": \"\
+    \"\n        },\n        \"orientation\": \"auto\",\n        \"textMode\": \"auto\"\
+    ,\n        \"colorMode\": \"value\",\n        \"graphMode\": \"area\",\n     \
+    \   \"justifyMode\": \"auto\"\n      },\n      \"fieldConfig\": {\n        \"\
+    defaults\": {\n          \"unit\": \"ms\"\n        },\n        \"overrides\":\
+    \ []\n      }\n    },\n    {\n      \"id\": 6,\n      \"type\": \"row\",\n   \
+    \   \"title\": \"Top 10 Per Route\",\n      \"gridPos\": {\n        \"h\": 1,\n\
+    \        \"w\": 24,\n        \"x\": 0,\n        \"y\": 7\n      },\n      \"collapsed\"\
+    : false,\n      \"panels\": []\n    },\n    {\n      \"id\": 7,\n      \"type\"\
+    : \"timeseries\",\n      \"title\": \"Incoming Bytes\",\n      \"datasource\"\
+    : \"$datasource\",\n      \"gridPos\": {\n        \"h\": 8,\n        \"w\": 12,\n\
+    \        \"x\": 0,\n        \"y\": 8\n      },\n      \"targets\": [\n       \
+    \ {\n          \"refId\": \"A\",\n          \"expr\": \"topk(10, sum by (cluster,\
+    \ route) (rate(haproxy_server_bytes_in_total{cluster=~\\\"$cluster\\\",route!=\\\
+    \"\\\"}[10m])) != 0)\",\n          \"datasource\": \"$datasource\",\n        \
+    \  \"legendFormat\": \"{{cluster}} {{route}}\"\n        }\n      ],\n      \"\
+    options\": {},\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"\
+    unit\": \"Bps\"\n        },\n        \"overrides\": []\n      }\n    },\n    {\n\
+    \      \"id\": 8,\n      \"type\": \"timeseries\",\n      \"title\": \"Outgoing\
+    \ Bytes\",\n      \"datasource\": \"$datasource\",\n      \"gridPos\": {\n   \
+    \     \"h\": 8,\n        \"w\": 12,\n        \"x\": 12,\n        \"y\": 8\n  \
+    \    },\n      \"targets\": [\n        {\n          \"refId\": \"A\",\n      \
+    \    \"expr\": \"topk(10, sum by (cluster, route) (rate(haproxy_server_bytes_out_total{cluster=~\\\
+    \"$cluster\\\",route!=\\\"\\\"}[10m])) != 0)\",\n          \"datasource\": \"\
+    $datasource\",\n          \"legendFormat\": \"{{cluster}} {{route}}\"\n      \
+    \  }\n      ],\n      \"options\": {},\n      \"fieldConfig\": {\n        \"defaults\"\
+    : {\n          \"unit\": \"Bps\"\n        },\n        \"overrides\": []\n    \
+    \  }\n    },\n    {\n      \"id\": 9,\n      \"type\": \"timeseries\",\n     \
+    \ \"title\": \"HTTP Server Response Error Rate\",\n      \"datasource\": \"$datasource\"\
+    ,\n      \"gridPos\": {\n        \"h\": 8,\n        \"w\": 12,\n        \"x\"\
+    : 0,\n        \"y\": 16\n      },\n      \"targets\": [\n        {\n         \
+    \ \"refId\": \"A\",\n          \"expr\": \"topk(10, sum by (cluster, route) (rate(haproxy_server_http_responses_total{cluster=~\\\
+    \"$cluster\\\",code=~\\\"4xx|5xx\\\", route!=\\\"\\\"}[10m]) != 0) / sum by (cluster,\
+    \ route) (rate(haproxy_server_http_responses_total{cluster=~\\\"$cluster\\\",route!=\\\
+    \"\\\"}[10m])))\",\n          \"datasource\": \"$datasource\",\n          \"legendFormat\"\
+    : \"{{cluster}} {{route}}\"\n        }\n      ],\n      \"options\": {},\n   \
+    \   \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\": \"percentunit\"\
+    \n        },\n        \"overrides\": []\n      }\n    },\n    {\n      \"id\"\
+    : 10,\n      \"type\": \"timeseries\",\n      \"title\": \"Average HTTP Server\
+    \ Response Latency (ms)\",\n      \"datasource\": \"$datasource\",\n      \"gridPos\"\
+    : {\n        \"h\": 8,\n        \"w\": 12,\n        \"x\": 12,\n        \"y\"\
+    : 16\n      },\n      \"targets\": [\n        {\n          \"refId\": \"A\",\n\
+    \          \"expr\": \"topk(10, avg by (cluster, route) (haproxy_server_http_average_response_latency_milliseconds{cluster=~\\\
+    \"$cluster\\\",route!=\\\"\\\"} != 0) != 0)\",\n          \"datasource\": \"$datasource\"\
+    ,\n          \"legendFormat\": \"{{cluster}} {{route}}\"\n        }\n      ],\n\
+    \      \"options\": {},\n      \"fieldConfig\": {\n        \"defaults\": {\n \
+    \         \"unit\": \"ms\"\n        },\n        \"overrides\": []\n      }\n \
+    \   },\n    {\n      \"id\": 11,\n      \"type\": \"row\",\n      \"title\": \"\
+    Top 10 Per Namespace\",\n      \"gridPos\": {\n        \"h\": 1,\n        \"w\"\
+    : 24,\n        \"x\": 0,\n        \"y\": 24\n      },\n      \"collapsed\": false,\n\
+    \      \"panels\": []\n    },\n    {\n      \"id\": 12,\n      \"type\": \"timeseries\"\
+    ,\n      \"title\": \"Incoming Bytes\",\n      \"datasource\": \"$datasource\"\
+    ,\n      \"gridPos\": {\n        \"h\": 8,\n        \"w\": 12,\n        \"x\"\
+    : 0,\n        \"y\": 25\n      },\n      \"targets\": [\n        {\n         \
+    \ \"refId\": \"A\",\n          \"expr\": \"topk(10, sum by (cluster, exported_namespace)\
+    \ (rate(haproxy_server_bytes_in_total{cluster=~\\\"$cluster\\\",exported_namespace!=\\\
+    \"\\\"}[10m])) != 0)\",\n          \"datasource\": \"$datasource\",\n        \
+    \  \"legendFormat\": \"{{cluster}} {{exported_namespace}}\"\n        }\n     \
+    \ ],\n      \"options\": {},\n      \"fieldConfig\": {\n        \"defaults\":\
+    \ {\n          \"unit\": \"Bps\"\n        },\n        \"overrides\": []\n    \
+    \  }\n    },\n    {\n      \"id\": 13,\n      \"type\": \"timeseries\",\n    \
+    \  \"title\": \"Outgoing Bytes\",\n      \"datasource\": \"$datasource\",\n  \
+    \    \"gridPos\": {\n        \"h\": 8,\n        \"w\": 12,\n        \"x\": 12,\n\
+    \        \"y\": 25\n      },\n      \"targets\": [\n        {\n          \"refId\"\
+    : \"A\",\n          \"expr\": \"topk(10, sum by (cluster, exported_namespace)\
+    \ (rate(haproxy_server_bytes_out_total{cluster=~\\\"$cluster\\\",exported_namespace!=\\\
+    \"\\\"}[10m])) != 0)\",\n          \"datasource\": \"$datasource\",\n        \
+    \  \"legendFormat\": \"{{cluster}} {{exported_namespace}}\"\n        }\n     \
+    \ ],\n      \"options\": {},\n      \"fieldConfig\": {\n        \"defaults\":\
+    \ {\n          \"unit\": \"Bps\"\n        },\n        \"overrides\": []\n    \
+    \  }\n    },\n    {\n      \"id\": 14,\n      \"type\": \"timeseries\",\n    \
+    \  \"title\": \"HTTP Server Response Error Rate\",\n      \"datasource\": \"$datasource\"\
+    ,\n      \"gridPos\": {\n        \"h\": 8,\n        \"w\": 12,\n        \"x\"\
+    : 0,\n        \"y\": 33\n      },\n      \"targets\": [\n        {\n         \
+    \ \"refId\": \"A\",\n          \"expr\": \"topk(10, sum by (cluster, exported_namespace)\
+    \ (rate(haproxy_server_http_responses_total{cluster=~\\\"$cluster\\\",code=~\\\
+    \"4xx|5xx\\\", route!=\\\"\\\"}[10m]) != 0) / sum by (cluster, exported_namespace)\
+    \ (rate(haproxy_server_http_responses_total{cluster=~\\\"$cluster\\\",route!=\\\
+    \"\\\"}[10m])))\",\n          \"datasource\": \"$datasource\",\n          \"legendFormat\"\
+    : \"{{cluster}} {{exported_namespace}}\"\n        }\n      ],\n      \"options\"\
+    : {},\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\":\
+    \ \"percentunit\"\n        },\n        \"overrides\": []\n      }\n    },\n  \
+    \  {\n      \"id\": 15,\n      \"type\": \"timeseries\",\n      \"title\": \"\
+    Average HTTP Server Response Latency (ms)\",\n      \"datasource\": \"$datasource\"\
+    ,\n      \"gridPos\": {\n        \"h\": 8,\n        \"w\": 12,\n        \"x\"\
+    : 12,\n        \"y\": 33\n      },\n      \"targets\": [\n        {\n        \
+    \  \"refId\": \"A\",\n          \"expr\": \"topk(10, avg by (cluster, exported_namespace)\
+    \ (haproxy_server_http_average_response_latency_milliseconds{cluster=~\\\"$cluster\\\
+    \",exported_namespace!=\\\"\\\"} != 0) != 0)\",\n          \"datasource\": \"\
+    $datasource\",\n          \"legendFormat\": \"{{cluster}} {{exported_namespace}}\"\
+    \n        }\n      ],\n      \"options\": {},\n      \"fieldConfig\": {\n    \
+    \    \"defaults\": {\n          \"unit\": \"ms\"\n        },\n        \"overrides\"\
+    : []\n      }\n    },\n    {\n      \"id\": 16,\n      \"type\": \"row\",\n  \
+    \    \"title\": \"Top 10 Per Shard\",\n      \"gridPos\": {\n        \"h\": 1,\n\
+    \        \"w\": 24,\n        \"x\": 0,\n        \"y\": 41\n      },\n      \"\
+    collapsed\": false,\n      \"panels\": []\n    },\n    {\n      \"id\": 17,\n\
+    \      \"type\": \"timeseries\",\n      \"title\": \"Incoming Bytes\",\n     \
+    \ \"datasource\": \"$datasource\",\n      \"gridPos\": {\n        \"h\": 8,\n\
+    \        \"w\": 12,\n        \"x\": 0,\n        \"y\": 42\n      },\n      \"\
+    targets\": [\n        {\n          \"refId\": \"A\",\n          \"expr\": \"topk(10,\
+    \ sum by (cluster, service) (rate(haproxy_server_bytes_in_total{cluster=~\\\"\
+    $cluster\\\",route!=\\\"\\\"}[10m])) != 0)\",\n          \"datasource\": \"$datasource\"\
+    ,\n          \"legendFormat\": \"{{cluster}} {{service}}\"\n        }\n      ],\n\
+    \      \"options\": {},\n      \"fieldConfig\": {\n        \"defaults\": {\n \
+    \         \"unit\": \"Bps\"\n        },\n        \"overrides\": []\n      }\n\
+    \    },\n    {\n      \"id\": 18,\n      \"type\": \"timeseries\",\n      \"title\"\
+    : \"Outgoing Bytes\",\n      \"datasource\": \"$datasource\",\n      \"gridPos\"\
+    : {\n        \"h\": 8,\n        \"w\": 12,\n        \"x\": 12,\n        \"y\"\
+    : 42\n      },\n      \"targets\": [\n        {\n          \"refId\": \"A\",\n\
+    \          \"expr\": \"topk(10, sum by (cluster, service) (rate(haproxy_server_bytes_out_total{cluster=~\\\
+    \"$cluster\\\",route!=\\\"\\\"}[10m])) != 0)\",\n          \"datasource\": \"\
+    $datasource\",\n          \"legendFormat\": \"{{cluster}} {{service}}\"\n    \
+    \    }\n      ],\n      \"options\": {},\n      \"fieldConfig\": {\n        \"\
+    defaults\": {\n          \"unit\": \"Bps\"\n        },\n        \"overrides\"\
+    : []\n      }\n    },\n    {\n      \"id\": 19,\n      \"type\": \"timeseries\"\
+    ,\n      \"title\": \"HTTP Server Response Error Rate\",\n      \"datasource\"\
+    : \"$datasource\",\n      \"gridPos\": {\n        \"h\": 8,\n        \"w\": 12,\n\
+    \        \"x\": 0,\n        \"y\": 50\n      },\n      \"targets\": [\n      \
+    \  {\n          \"refId\": \"A\",\n          \"expr\": \"topk(10, sum by (cluster,\
+    \ service) (rate(haproxy_server_http_responses_total{cluster=~\\\"$cluster\\\"\
+    ,code=~\\\"4xx|5xx\\\", route!=\\\"\\\"}[10m]) != 0) / sum by (cluster, service)\
+    \ (rate(haproxy_server_http_responses_total{cluster=~\\\"$cluster\\\",route!=\\\
+    \"\\\"}[10m])))\",\n          \"datasource\": \"$datasource\",\n          \"legendFormat\"\
+    : \"{{cluster}} {{service}}\"\n        }\n      ],\n      \"options\": {},\n \
+    \     \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\": \"percentunit\"\
+    \n        },\n        \"overrides\": []\n      }\n    },\n    {\n      \"id\"\
+    : 20,\n      \"type\": \"timeseries\",\n      \"title\": \"Average HTTP Server\
+    \ Response Latency (ms)\",\n      \"datasource\": \"$datasource\",\n      \"gridPos\"\
+    : {\n        \"h\": 8,\n        \"w\": 12,\n        \"x\": 12,\n        \"y\"\
+    : 50\n      },\n      \"targets\": [\n        {\n          \"refId\": \"A\",\n\
+    \          \"expr\": \"topk(10, avg by (cluster, service) (haproxy_server_http_average_response_latency_milliseconds{cluster=~\\\
+    \"$cluster\\\",route!=\\\"\\\"} != 0) != 0)\",\n          \"datasource\": \"$datasource\"\
+    ,\n          \"legendFormat\": \"{{cluster}} {{service}}\"\n        }\n      ],\n\
+    \      \"options\": {},\n      \"fieldConfig\": {\n        \"defaults\": {\n \
+    \         \"unit\": \"ms\"\n        },\n        \"overrides\": []\n      }\n \
+    \   },\n    {\n      \"id\": 21,\n      \"type\": \"timeseries\",\n      \"title\"\
+    : \"Number of Routes\",\n      \"datasource\": \"$datasource\",\n      \"gridPos\"\
+    : {\n        \"h\": 8,\n        \"w\": 24,\n        \"x\": 0,\n        \"y\":\
+    \ 58\n      },\n      \"targets\": [\n        {\n          \"refId\": \"A\",\n\
+    \          \"expr\": \"topk(10, count by (cluster, service) (count by (cluster,\
+    \ route, service) (haproxy_server_up{cluster=~\\\"$cluster\\\"} == 1)) != 0)\"\
+    ,\n          \"datasource\": \"$datasource\",\n          \"legendFormat\": \"\
+    {{cluster}} {{service}}\"\n        }\n      ],\n      \"options\": {},\n     \
+    \ \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\": \"short\"\n\
+    \        },\n        \"overrides\": []\n      }\n    }\n  ]\n}"

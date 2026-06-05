@@ -1,0 +1,658 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: observability-metrics-custom-allowlist
+  namespace: open-cluster-management-observability
+data:
+  metrics_list.yaml: |
+    names:
+      - ovnkube_node_cni_request_duration_seconds_count
+      - ovnkube_node_cni_request_duration_seconds_bucket
+      - pod_network_connectivity_check_tcp_connect_latency_gauge
+      - container_cpu_usage_seconds_total
+      - container_memory_rss
+      - haproxy_server_bytes_in_total
+      - haproxy_server_bytes_out_total
+      - haproxy_server_http_responses_total
+      - haproxy_server_http_average_response_latency_milliseconds
+      - haproxy_server_up
+      - container_network_receive_bytes_total
+      - container_network_transmit_bytes_total
+      - container_network_receive_packets_dropped_total
+      - container_network_transmit_packets_dropped_total
+      - container_network_receive_errors_total
+      - container_network_transmit_errors_total
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: networking-linux-subsystem-stats-dashboard
+  namespace: open-cluster-management-observability
+  labels:
+    grafana-custom-dashboard: 'true'
+  annotations:
+    observability.open-cluster-management.io/dashboard-folder: Networking
+data:
+  networking-linux-subsystem-stats.json: |-
+    {
+      "uid": "networking-linux-subsystem-stats-acm",
+      "title": "Networking / Linux Subsystem Stats",
+      "tags": [
+        "openshift",
+        "networking",
+        "linux-subsystem",
+        "acm"
+      ],
+      "timezone": "browser",
+      "schemaVersion": 36,
+      "version": 1,
+      "refresh": "30s",
+      "time": {
+        "from": "now-30m",
+        "to": "now"
+      },
+      "templating": {
+        "list": [
+          {
+            "name": "datasource",
+            "type": "datasource",
+            "query": "prometheus",
+            "current": {
+              "text": "Observatorium",
+              "value": "Observatorium"
+            },
+            "hide": 2,
+            "refresh": 1
+          },
+          {
+            "name": "acm_label_names",
+            "type": "query",
+            "label": "Label",
+            "datasource": "$datasource",
+            "query": "label_values(acm_label_names, label_name)",
+            "refresh": 1,
+            "sort": 1,
+            "multi": false,
+            "includeAll": false,
+            "current": {
+              "selected": true,
+              "text": "name",
+              "value": "name"
+            }
+          },
+          {
+            "name": "value",
+            "type": "query",
+            "label": "Value",
+            "datasource": "$datasource",
+            "query": "label_values(acm_managed_cluster_labels, $acm_label_names)",
+            "refresh": 1,
+            "sort": 1,
+            "multi": true,
+            "includeAll": true,
+            "allValue": ".*",
+            "current": {
+              "selected": true,
+              "text": "All",
+              "value": "$__all"
+            }
+          },
+          {
+            "name": "cluster",
+            "type": "query",
+            "label": "Cluster",
+            "datasource": "$datasource",
+            "query": "label_values(acm_managed_cluster_labels{$acm_label_names=~\"$value\"}, name)",
+            "refresh": 1,
+            "sort": 1,
+            "multi": true,
+            "includeAll": true,
+            "allValue": ".*",
+            "hide": 2,
+            "current": {
+              "selected": true,
+              "text": "All",
+              "value": "$__all"
+            }
+          }
+        ]
+      },
+      "panels": [
+        {
+          "id": 1,
+          "type": "row",
+          "title": "Default",
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "collapsed": false,
+          "panels": []
+        },
+        {
+          "id": 2,
+          "type": "stat",
+          "title": "Current Receive Bandwidth",
+          "datasource": "$datasource",
+          "gridPos": {
+            "h": 6,
+            "w": 6,
+            "x": 0,
+            "y": 1
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum by (cluster) (rate(container_network_receive_bytes_total{cluster=~\"$cluster\"}[10m]))",
+              "datasource": "$datasource",
+              "legendFormat": "{{cluster}}"
+            }
+          ],
+          "options": {
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "orientation": "auto",
+            "textMode": "auto",
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "Bps"
+            },
+            "overrides": []
+          }
+        },
+        {
+          "id": 3,
+          "type": "stat",
+          "title": "Current Transmit Bandwidth",
+          "datasource": "$datasource",
+          "gridPos": {
+            "h": 6,
+            "w": 6,
+            "x": 6,
+            "y": 1
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum by (cluster) (rate(container_network_transmit_bytes_total{cluster=~\"$cluster\"}[10m]))",
+              "datasource": "$datasource",
+              "legendFormat": "{{cluster}}"
+            }
+          ],
+          "options": {
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "orientation": "auto",
+            "textMode": "auto",
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "Bps"
+            },
+            "overrides": []
+          }
+        },
+        {
+          "id": 4,
+          "type": "stat",
+          "title": "Current Drops",
+          "datasource": "$datasource",
+          "gridPos": {
+            "h": 6,
+            "w": 6,
+            "x": 12,
+            "y": 1
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum by (cluster) (rate(container_network_receive_packets_dropped_total{cluster=~\"$cluster\"}[10m])) + sum by (cluster) (rate(container_network_transmit_packets_dropped_total{cluster=~\"$cluster\"}[10m]))",
+              "datasource": "$datasource",
+              "legendFormat": "{{cluster}}"
+            }
+          ],
+          "options": {
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "orientation": "auto",
+            "textMode": "auto",
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "pps"
+            },
+            "overrides": []
+          }
+        },
+        {
+          "id": 5,
+          "type": "stat",
+          "title": "Current Errors",
+          "datasource": "$datasource",
+          "gridPos": {
+            "h": 6,
+            "w": 6,
+            "x": 18,
+            "y": 1
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum by (cluster) (rate(container_network_receive_errors_total{cluster=~\"$cluster\"}[10m])) + sum by (cluster) (rate(container_network_transmit_errors_total{cluster=~\"$cluster\"}[10m]))",
+              "datasource": "$datasource",
+              "legendFormat": "{{cluster}}"
+            }
+          ],
+          "options": {
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "orientation": "auto",
+            "textMode": "auto",
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "pps"
+            },
+            "overrides": []
+          }
+        },
+        {
+          "id": 6,
+          "type": "row",
+          "title": "Network Utilisation",
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 7
+          },
+          "collapsed": false,
+          "panels": []
+        },
+        {
+          "id": 7,
+          "type": "timeseries",
+          "title": "Bytes Received, by Node",
+          "datasource": "$datasource",
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 8
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum by (cluster, node) (rate(container_network_receive_bytes_total{cluster=~\"$cluster\"}[10m]))",
+              "datasource": "$datasource",
+              "legendFormat": "{{cluster}} {{node}}"
+            }
+          ],
+          "options": {},
+          "fieldConfig": {
+            "defaults": {
+              "unit": "Bps"
+            },
+            "overrides": []
+          }
+        },
+        {
+          "id": 8,
+          "type": "timeseries",
+          "title": "Bytes Sent, by Node",
+          "datasource": "$datasource",
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 8
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum by (cluster, node) (rate(container_network_transmit_bytes_total{cluster=~\"$cluster\"}[10m]))",
+              "datasource": "$datasource",
+              "legendFormat": "{{cluster}} {{node}}"
+            }
+          ],
+          "options": {},
+          "fieldConfig": {
+            "defaults": {
+              "unit": "Bps"
+            },
+            "overrides": []
+          }
+        },
+        {
+          "id": 9,
+          "type": "timeseries",
+          "title": "Bytes Received, by Interface",
+          "datasource": "$datasource",
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 16
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum by (cluster, dev) (label_replace(label_replace(rate(container_network_receive_bytes_total{cluster=~\"$cluster\"}[10m]), \"dev\", \"$1\", \"interface\", \"(.*)\"), \"dev\", \"(pod)\", \"interface\", \"[a-f0-9]{15}\"))",
+              "datasource": "$datasource",
+              "legendFormat": "{{cluster}} {{dev}}"
+            }
+          ],
+          "options": {},
+          "fieldConfig": {
+            "defaults": {
+              "unit": "Bps"
+            },
+            "overrides": []
+          }
+        },
+        {
+          "id": 10,
+          "type": "timeseries",
+          "title": "Bytes Sent, by Interface",
+          "datasource": "$datasource",
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 16
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum by (cluster, dev) (label_replace(label_replace(rate(container_network_transmit_bytes_total{cluster=~\"$cluster\"}[10m]), \"dev\", \"$1\", \"interface\", \"(.*)\"), \"dev\", \"(pod)\", \"interface\", \"[a-f0-9]{15}\"))",
+              "datasource": "$datasource",
+              "legendFormat": "{{cluster}} {{dev}}"
+            }
+          ],
+          "options": {},
+          "fieldConfig": {
+            "defaults": {
+              "unit": "Bps"
+            },
+            "overrides": []
+          }
+        },
+        {
+          "id": 11,
+          "type": "row",
+          "title": "Network Saturation",
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 24
+          },
+          "collapsed": false,
+          "panels": []
+        },
+        {
+          "id": 12,
+          "type": "timeseries",
+          "title": "Packets Received Dropped, by Node",
+          "datasource": "$datasource",
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 25
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum by (cluster, node) (rate(container_network_receive_packets_dropped_total{cluster=~\"$cluster\"}[10m]))",
+              "datasource": "$datasource",
+              "legendFormat": "{{cluster}} {{node}}"
+            }
+          ],
+          "options": {},
+          "fieldConfig": {
+            "defaults": {
+              "unit": "pps"
+            },
+            "overrides": []
+          }
+        },
+        {
+          "id": 13,
+          "type": "timeseries",
+          "title": "Packets Sent Dropped, by Node",
+          "datasource": "$datasource",
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 25
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum by (cluster, node) (rate(container_network_transmit_packets_dropped_total{cluster=~\"$cluster\"}[10m]))",
+              "datasource": "$datasource",
+              "legendFormat": "{{cluster}} {{node}}"
+            }
+          ],
+          "options": {},
+          "fieldConfig": {
+            "defaults": {
+              "unit": "pps"
+            },
+            "overrides": []
+          }
+        },
+        {
+          "id": 14,
+          "type": "timeseries",
+          "title": "Packets Received Dropped, by Interface",
+          "datasource": "$datasource",
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 33
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum by (cluster, dev) (label_replace(label_replace(rate(container_network_receive_packets_dropped_total{cluster=~\"$cluster\"}[10m]), \"dev\", \"$1\", \"interface\", \"(.*)\"), \"dev\", \"(pod)\", \"interface\", \"[a-f0-9]{15}\"))",
+              "datasource": "$datasource",
+              "legendFormat": "{{cluster}} {{dev}}"
+            }
+          ],
+          "options": {},
+          "fieldConfig": {
+            "defaults": {
+              "unit": "pps"
+            },
+            "overrides": []
+          }
+        },
+        {
+          "id": 15,
+          "type": "timeseries",
+          "title": "Packets Sent Dropped, by Interface",
+          "datasource": "$datasource",
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 33
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum by (cluster, dev) (label_replace(label_replace(rate(container_network_transmit_packets_dropped_total{cluster=~\"$cluster\"}[10m]), \"dev\", \"$1\", \"interface\", \"(.*)\"), \"dev\", \"(pod)\", \"interface\", \"[a-f0-9]{15}\"))",
+              "datasource": "$datasource",
+              "legendFormat": "{{cluster}} {{dev}}"
+            }
+          ],
+          "options": {},
+          "fieldConfig": {
+            "defaults": {
+              "unit": "pps"
+            },
+            "overrides": []
+          }
+        },
+        {
+          "id": 16,
+          "type": "row",
+          "title": "Network Errors",
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 41
+          },
+          "collapsed": false,
+          "panels": []
+        },
+        {
+          "id": 17,
+          "type": "timeseries",
+          "title": "Packets Received, by Node",
+          "datasource": "$datasource",
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 42
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum by (cluster, node) (rate(container_network_receive_errors_total{cluster=~\"$cluster\"}[10m]))",
+              "datasource": "$datasource",
+              "legendFormat": "{{cluster}} {{node}}"
+            }
+          ],
+          "options": {},
+          "fieldConfig": {
+            "defaults": {
+              "unit": "pps"
+            },
+            "overrides": []
+          }
+        },
+        {
+          "id": 18,
+          "type": "timeseries",
+          "title": "Packets Sent, by Node",
+          "datasource": "$datasource",
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 42
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum by (cluster, node) (rate(container_network_transmit_errors_total{cluster=~\"$cluster\"}[10m]))",
+              "datasource": "$datasource",
+              "legendFormat": "{{cluster}} {{node}}"
+            }
+          ],
+          "options": {},
+          "fieldConfig": {
+            "defaults": {
+              "unit": "pps"
+            },
+            "overrides": []
+          }
+        },
+        {
+          "id": 19,
+          "type": "timeseries",
+          "title": "Packets Received, by Interface",
+          "datasource": "$datasource",
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 50
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum by (cluster, dev) (label_replace(label_replace(rate(container_network_receive_errors_total{cluster=~\"$cluster\"}[10m]), \"dev\", \"$1\", \"interface\", \"(.*)\"), \"dev\", \"(pod)\", \"interface\", \"[a-f0-9]{15}\"))",
+              "datasource": "$datasource",
+              "legendFormat": "{{cluster}} {{dev}}"
+            }
+          ],
+          "options": {},
+          "fieldConfig": {
+            "defaults": {
+              "unit": "pps"
+            },
+            "overrides": []
+          }
+        },
+        {
+          "id": 20,
+          "type": "timeseries",
+          "title": "Packets Sent, by Interface",
+          "datasource": "$datasource",
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 50
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "expr": "sum by (cluster, dev) (label_replace(label_replace(rate(container_network_transmit_errors_total{cluster=~\"$cluster\"}[10m]), \"dev\", \"$1\", \"interface\", \"(.*)\"), \"dev\", \"(pod)\", \"interface\", \"[a-f0-9]{15}\"))",
+              "datasource": "$datasource",
+              "legendFormat": "{{cluster}} {{dev}}"
+            }
+          ],
+          "options": {},
+          "fieldConfig": {
+            "defaults": {
+              "unit": "pps"
+            },
+            "overrides": []
+          }
+        }
+      ]
+    }

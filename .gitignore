@@ -1,0 +1,20 @@
+# Kubernetes / OpenShift sensitive files
+kubeconfig
+*.kubeconfig
+*.pem
+*.key
+*.crt
+*.csr
+*.token
+*.secret
+*pull-secret*
+*dockerconfigjson*
+*thanos*.yaml
+*credentials*
+*password*
+
+# Local/editor files
+.DS_Store
+*.swp
+*.bak
+*.tmp

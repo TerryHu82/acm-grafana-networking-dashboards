@@ -1,0 +1,315 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: observability-metrics-custom-allowlist
+  namespace: open-cluster-management-observability
+data:
+  metrics_list.yaml: "names:\n  - ovnkube_node_cni_request_duration_seconds_count\n\
+    \  - ovnkube_node_cni_request_duration_seconds_bucket\n  - pod_network_connectivity_check_tcp_connect_latency_gauge\n\
+    \  - container_cpu_usage_seconds_total\n  - container_memory_rss\n"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: networking-infrastructure-dashboard
+  namespace: open-cluster-management-observability
+  labels:
+    grafana-custom-dashboard: 'true'
+  annotations:
+    observability.open-cluster-management.io/dashboard-folder: Networking
+data:
+  networking-infrastructure.json: "{\n  \"uid\": \"networking-infrastructure-acm\"\
+    ,\n  \"title\": \"Networking / Infrastructure\",\n  \"tags\": [\n    \"openshift\"\
+    ,\n    \"networking\",\n    \"infrastructure\",\n    \"ovn-kubernetes\",\n   \
+    \ \"acm\"\n  ],\n  \"timezone\": \"browser\",\n  \"schemaVersion\": 30,\n  \"\
+    version\": 5,\n  \"refresh\": \"30s\",\n  \"time\": {\n    \"from\": \"now-1h\"\
+    ,\n    \"to\": \"now\"\n  },\n  \"panels\": [\n    {\n      \"id\": 1,\n     \
+    \ \"type\": \"row\",\n      \"title\": \"Network Configuration\",\n      \"gridPos\"\
+    : {\n        \"h\": 1,\n        \"w\": 24,\n        \"x\": 0,\n        \"y\":\
+    \ 0\n      },\n      \"collapsed\": false,\n      \"panels\": []\n    },\n   \
+    \ {\n      \"id\": 2,\n      \"type\": \"stat\",\n      \"title\": \"Changes Per\
+    \ Second\",\n      \"datasource\": \"$datasource\",\n      \"gridPos\": {\n  \
+    \      \"h\": 6,\n        \"w\": 6,\n        \"x\": 0,\n        \"y\": 1\n   \
+    \   },\n      \"targets\": [\n        {\n          \"refId\": \"A\",\n       \
+    \   \"expr\": \"sum by (cluster) (rate(ovnkube_node_cni_request_duration_seconds_count{cluster=~\\\
+    \"$cluster\\\"}[10m]))\",\n          \"range\": true,\n          \"legendFormat\"\
+    : \"{{cluster}}\"\n        }\n      ],\n      \"fieldConfig\": {\n        \"defaults\"\
+    : {\n          \"unit\": \"ops\",\n          \"decimals\": 2\n        },\n   \
+    \     \"overrides\": []\n      },\n      \"options\": {\n        \"reduceOptions\"\
+    : {\n          \"values\": false,\n          \"calcs\": [\n            \"lastNotNull\"\
+    \n          ],\n          \"fields\": \"\"\n        },\n        \"orientation\"\
+    : \"auto\",\n        \"textMode\": \"auto\",\n        \"colorMode\": \"value\"\
+    ,\n        \"graphMode\": \"area\",\n        \"justifyMode\": \"auto\"\n     \
+    \ }\n    },\n    {\n      \"id\": 3,\n      \"type\": \"stat\",\n      \"title\"\
+    : \"Errors\",\n      \"datasource\": \"$datasource\",\n      \"gridPos\": {\n\
+    \        \"h\": 6,\n        \"w\": 6,\n        \"x\": 6,\n        \"y\": 1\n \
+    \     },\n      \"targets\": [\n        {\n          \"refId\": \"A\",\n     \
+    \     \"expr\": \"sum by (cluster) (ovnkube_node_cni_request_duration_seconds_count{cluster=~\\\
+    \"$cluster\\\",err!=\\\"false\\\"}) / sum by (cluster) (ovnkube_node_cni_request_duration_seconds_count{cluster=~\\\
+    \"$cluster\\\"})\",\n          \"range\": true,\n          \"legendFormat\": \"\
+    {{cluster}}\"\n        }\n      ],\n      \"fieldConfig\": {\n        \"defaults\"\
+    : {\n          \"unit\": \"percentunit\",\n          \"decimals\": 4\n       \
+    \ },\n        \"overrides\": []\n      },\n      \"options\": {\n        \"reduceOptions\"\
+    : {\n          \"values\": false,\n          \"calcs\": [\n            \"lastNotNull\"\
+    \n          ],\n          \"fields\": \"\"\n        },\n        \"orientation\"\
+    : \"auto\",\n        \"textMode\": \"auto\",\n        \"colorMode\": \"value\"\
+    ,\n        \"graphMode\": \"area\",\n        \"justifyMode\": \"auto\"\n     \
+    \ }\n    },\n    {\n      \"id\": 4,\n      \"type\": \"stat\",\n      \"title\"\
+    : \"Latency on Pod Creation, P99\",\n      \"datasource\": \"$datasource\",\n\
+    \      \"gridPos\": {\n        \"h\": 6,\n        \"w\": 6,\n        \"x\": 12,\n\
+    \        \"y\": 1\n      },\n      \"targets\": [\n        {\n          \"refId\"\
+    : \"A\",\n          \"expr\": \"histogram_quantile(0.99, sum by(cluster, le) (rate(ovnkube_node_cni_request_duration_seconds_bucket{cluster=~\\\
+    \"$cluster\\\",command=\\\"ADD\\\"}[10m]))) > 0\",\n          \"range\": true,\n\
+    \          \"legendFormat\": \"{{cluster}}\"\n        }\n      ],\n      \"fieldConfig\"\
+    : {\n        \"defaults\": {\n          \"unit\": \"s\",\n          \"decimals\"\
+    : 3\n        },\n        \"overrides\": []\n      },\n      \"options\": {\n \
+    \       \"reduceOptions\": {\n          \"values\": false,\n          \"calcs\"\
+    : [\n            \"lastNotNull\"\n          ],\n          \"fields\": \"\"\n \
+    \       },\n        \"orientation\": \"auto\",\n        \"textMode\": \"auto\"\
+    ,\n        \"colorMode\": \"value\",\n        \"graphMode\": \"area\",\n     \
+    \   \"justifyMode\": \"auto\"\n      }\n    },\n    {\n      \"id\": 5,\n    \
+    \  \"type\": \"stat\",\n      \"title\": \"Latency on Pod Deletion, P99\",\n \
+    \     \"datasource\": \"$datasource\",\n      \"gridPos\": {\n        \"h\": 6,\n\
+    \        \"w\": 6,\n        \"x\": 18,\n        \"y\": 1\n      },\n      \"targets\"\
+    : [\n        {\n          \"refId\": \"A\",\n          \"expr\": \"histogram_quantile(0.99,\
+    \ sum by(cluster, le) (rate(ovnkube_node_cni_request_duration_seconds_bucket{cluster=~\\\
+    \"$cluster\\\",command=\\\"DEL\\\"}[10m]))) > 0\",\n          \"range\": true,\n\
+    \          \"legendFormat\": \"{{cluster}}\"\n        }\n      ],\n      \"fieldConfig\"\
+    : {\n        \"defaults\": {\n          \"unit\": \"s\",\n          \"decimals\"\
+    : 3\n        },\n        \"overrides\": []\n      },\n      \"options\": {\n \
+    \       \"reduceOptions\": {\n          \"values\": false,\n          \"calcs\"\
+    : [\n            \"lastNotNull\"\n          ],\n          \"fields\": \"\"\n \
+    \       },\n        \"orientation\": \"auto\",\n        \"textMode\": \"auto\"\
+    ,\n        \"colorMode\": \"value\",\n        \"graphMode\": \"area\",\n     \
+    \   \"justifyMode\": \"auto\"\n      }\n    },\n    {\n      \"id\": 6,\n    \
+    \  \"type\": \"timeseries\",\n      \"title\": \"Changes Per Second\",\n     \
+    \ \"datasource\": \"$datasource\",\n      \"gridPos\": {\n        \"h\": 8,\n\
+    \        \"w\": 8,\n        \"x\": 0,\n        \"y\": 7\n      },\n      \"targets\"\
+    : [\n        {\n          \"refId\": \"A\",\n          \"expr\": \"sum(rate(ovnkube_node_cni_request_duration_seconds_count{cluster=~\\\
+    \"$cluster\\\"}[10m])) by (cluster, err, command)\",\n          \"range\": true,\n\
+    \          \"legendFormat\": \"{{cluster}} {{command}} err={{err}}\"\n       \
+    \ }\n      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"\
+    unit\": \"ops\",\n          \"decimals\": 2\n        },\n        \"overrides\"\
+    : []\n      },\n      \"options\": {\n        \"legend\": {\n          \"displayMode\"\
+    : \"list\",\n          \"placement\": \"bottom\",\n          \"calcs\": []\n \
+    \       },\n        \"tooltip\": {\n          \"mode\": \"single\",\n        \
+    \  \"sort\": \"none\"\n        }\n      }\n    },\n    {\n      \"id\": 7,\n \
+    \     \"type\": \"timeseries\",\n      \"title\": \"Latency on Pod Creation\"\
+    ,\n      \"datasource\": \"$datasource\",\n      \"gridPos\": {\n        \"h\"\
+    : 8,\n        \"w\": 8,\n        \"x\": 8,\n        \"y\": 7\n      },\n     \
+    \ \"targets\": [\n        {\n          \"refId\": \"A\",\n          \"expr\":\
+    \ \"histogram_quantile(0.50, sum(rate(ovnkube_node_cni_request_duration_seconds_bucket{cluster=~\\\
+    \"$cluster\\\",command=\\\"ADD\\\"}[10m])) by (cluster, le)) > 0\",\n         \
+    \ \"range\": true,\n          \"legendFormat\": \"{{cluster}} p50 ADD\"\n    \
+    \    }\n      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n        \
+    \  \"unit\": \"s\",\n          \"decimals\": 3\n        },\n        \"overrides\"\
+    : []\n      },\n      \"options\": {\n        \"legend\": {\n          \"displayMode\"\
+    : \"list\",\n          \"placement\": \"bottom\",\n          \"calcs\": []\n \
+    \       },\n        \"tooltip\": {\n          \"mode\": \"single\",\n        \
+    \  \"sort\": \"none\"\n        }\n      }\n    },\n    {\n      \"id\": 8,\n \
+    \     \"type\": \"timeseries\",\n      \"title\": \"Latency on Pod Deletion\"\
+    ,\n      \"datasource\": \"$datasource\",\n      \"gridPos\": {\n        \"h\"\
+    : 8,\n        \"w\": 8,\n        \"x\": 16,\n        \"y\": 7\n      },\n    \
+    \  \"targets\": [\n        {\n          \"refId\": \"A\",\n          \"expr\"\
+    : \"histogram_quantile(0.50, sum(rate(ovnkube_node_cni_request_duration_seconds_bucket{cluster=~\\\
+    \"$cluster\\\",command=\\\"DEL\\\"}[10m])) by (cluster, le)) > 0\",\n         \
+    \ \"range\": true,\n          \"legendFormat\": \"{{cluster}} p50 DEL\"\n    \
+    \    }\n      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n        \
+    \  \"unit\": \"s\",\n          \"decimals\": 3\n        },\n        \"overrides\"\
+    : []\n      },\n      \"options\": {\n        \"legend\": {\n          \"displayMode\"\
+    : \"list\",\n          \"placement\": \"bottom\",\n          \"calcs\": []\n \
+    \       },\n        \"tooltip\": {\n          \"mode\": \"single\",\n        \
+    \  \"sort\": \"none\"\n        }\n      }\n    },\n    {\n      \"id\": 9,\n \
+    \     \"type\": \"row\",\n      \"title\": \"TCP Latency Probes\",\n      \"gridPos\"\
+    : {\n        \"h\": 1,\n        \"w\": 24,\n        \"x\": 0,\n        \"y\":\
+    \ 15\n      },\n      \"collapsed\": false,\n      \"panels\": []\n    },\n  \
+    \  {\n      \"id\": 10,\n      \"type\": \"stat\",\n      \"title\": \"Average\
+    \ Connection Latency\",\n      \"datasource\": \"$datasource\",\n      \"gridPos\"\
+    : {\n        \"h\": 6,\n        \"w\": 8,\n        \"x\": 0,\n        \"y\": 16\n\
+    \      },\n      \"targets\": [\n        {\n          \"refId\": \"A\",\n    \
+    \      \"expr\": \"avg by (cluster) (pod_network_connectivity_check_tcp_connect_latency_gauge{cluster=~\\\
+    \"$cluster\\\"} / 1000000000)\",\n          \"range\": true,\n          \"legendFormat\"\
+    : \"{{cluster}}\"\n        }\n      ],\n      \"fieldConfig\": {\n        \"defaults\"\
+    : {\n          \"unit\": \"s\",\n          \"decimals\": 3\n        },\n     \
+    \   \"overrides\": []\n      },\n      \"options\": {\n        \"reduceOptions\"\
+    : {\n          \"values\": false,\n          \"calcs\": [\n            \"lastNotNull\"\
+    \n          ],\n          \"fields\": \"\"\n        },\n        \"orientation\"\
+    : \"auto\",\n        \"textMode\": \"auto\",\n        \"colorMode\": \"value\"\
+    ,\n        \"graphMode\": \"area\",\n        \"justifyMode\": \"auto\"\n     \
+    \ }\n    },\n    {\n      \"id\": 11,\n      \"type\": \"stat\",\n      \"title\"\
+    : \"Maximum Connection Latency\",\n      \"datasource\": \"$datasource\",\n  \
+    \    \"gridPos\": {\n        \"h\": 6,\n        \"w\": 8,\n        \"x\": 8,\n\
+    \        \"y\": 16\n      },\n      \"targets\": [\n        {\n          \"refId\"\
+    : \"A\",\n          \"expr\": \"max by (cluster) (pod_network_connectivity_check_tcp_connect_latency_gauge{cluster=~\\\
+    \"$cluster\\\"} / 1000000000)\",\n          \"range\": true,\n          \"legendFormat\"\
+    : \"{{cluster}}\"\n        }\n      ],\n      \"fieldConfig\": {\n        \"defaults\"\
+    : {\n          \"unit\": \"s\",\n          \"decimals\": 3\n        },\n     \
+    \   \"overrides\": []\n      },\n      \"options\": {\n        \"reduceOptions\"\
+    : {\n          \"values\": false,\n          \"calcs\": [\n            \"lastNotNull\"\
+    \n          ],\n          \"fields\": \"\"\n        },\n        \"orientation\"\
+    : \"auto\",\n        \"textMode\": \"auto\",\n        \"colorMode\": \"value\"\
+    ,\n        \"graphMode\": \"area\",\n        \"justifyMode\": \"auto\"\n     \
+    \ }\n    },\n    {\n      \"id\": 12,\n      \"type\": \"stat\",\n      \"title\"\
+    : \"Minimum Connection Latency\",\n      \"datasource\": \"$datasource\",\n  \
+    \    \"gridPos\": {\n        \"h\": 6,\n        \"w\": 8,\n        \"x\": 16,\n\
+    \        \"y\": 16\n      },\n      \"targets\": [\n        {\n          \"refId\"\
+    : \"A\",\n          \"expr\": \"min by (cluster) (pod_network_connectivity_check_tcp_connect_latency_gauge{cluster=~\\\
+    \"$cluster\\\"} / 1000000000)\",\n          \"range\": true,\n          \"legendFormat\"\
+    : \"{{cluster}}\"\n        }\n      ],\n      \"fieldConfig\": {\n        \"defaults\"\
+    : {\n          \"unit\": \"s\",\n          \"decimals\": 3\n        },\n     \
+    \   \"overrides\": []\n      },\n      \"options\": {\n        \"reduceOptions\"\
+    : {\n          \"values\": false,\n          \"calcs\": [\n            \"lastNotNull\"\
+    \n          ],\n          \"fields\": \"\"\n        },\n        \"orientation\"\
+    : \"auto\",\n        \"textMode\": \"auto\",\n        \"colorMode\": \"value\"\
+    ,\n        \"graphMode\": \"area\",\n        \"justifyMode\": \"auto\"\n     \
+    \ }\n    },\n    {\n      \"id\": 13,\n      \"type\": \"timeseries\",\n     \
+    \ \"title\": \"TCP Connection Latency (ms)\",\n      \"datasource\": \"$datasource\"\
+    ,\n      \"gridPos\": {\n        \"h\": 8,\n        \"w\": 24,\n        \"x\"\
+    : 0,\n        \"y\": 22\n      },\n      \"targets\": [\n        {\n         \
+    \ \"refId\": \"A\",\n          \"expr\": \"min by (cluster) (pod_network_connectivity_check_tcp_connect_latency_gauge{cluster=~\\\
+    \"$cluster\\\"} / 1000000)\",\n          \"range\": true,\n          \"legendFormat\"\
+    : \"{{cluster}} min\"\n        },\n        {\n          \"refId\": \"B\",\n  \
+    \        \"expr\": \"max by (cluster) (pod_network_connectivity_check_tcp_connect_latency_gauge{cluster=~\\\
+    \"$cluster\\\"} / 1000000)\",\n          \"range\": true,\n          \"legendFormat\"\
+    : \"{{cluster}} max\"\n        },\n        {\n          \"refId\": \"C\",\n  \
+    \        \"expr\": \"avg by (cluster) (pod_network_connectivity_check_tcp_connect_latency_gauge{cluster=~\\\
+    \"$cluster\\\"} / 1000000)\",\n          \"range\": true,\n          \"legendFormat\"\
+    : \"{{cluster}} avg\"\n        }\n      ],\n      \"fieldConfig\": {\n       \
+    \ \"defaults\": {\n          \"unit\": \"ms\",\n          \"decimals\": 2\n  \
+    \      },\n        \"overrides\": []\n      },\n      \"options\": {\n       \
+    \ \"legend\": {\n          \"displayMode\": \"list\",\n          \"placement\"\
+    : \"bottom\",\n          \"calcs\": []\n        },\n        \"tooltip\": {\n \
+    \         \"mode\": \"single\",\n          \"sort\": \"none\"\n        }\n   \
+    \   }\n    },\n    {\n      \"id\": 14,\n      \"type\": \"row\",\n      \"title\"\
+    : \"Control Plane Resources\",\n      \"gridPos\": {\n        \"h\": 1,\n    \
+    \    \"w\": 24,\n        \"x\": 0,\n        \"y\": 30\n      },\n      \"collapsed\"\
+    : false,\n      \"panels\": []\n    },\n    {\n      \"id\": 15,\n      \"type\"\
+    : \"timeseries\",\n      \"title\": \"Control Plane CPU Usage\",\n      \"datasource\"\
+    : \"$datasource\",\n      \"gridPos\": {\n        \"h\": 8,\n        \"w\": 12,\n\
+    \        \"x\": 0,\n        \"y\": 31\n      },\n      \"targets\": [\n      \
+    \  {\n          \"refId\": \"A\",\n          \"expr\": \"sum(irate(container_cpu_usage_seconds_total{cluster=~\\\
+    \"$cluster\\\",pod=~\\\"ovnkube-master.*|ovnkube-control-plane-.*\\\",namespace=\\\
+    \"openshift-ovn-kubernetes\\\",container!~\\\"POD|\\\"}[10m])) by (cluster, pod)\
+    \ * 100\",\n          \"range\": true,\n          \"legendFormat\": \"{{cluster}}\
+    \ {{pod}}\"\n        }\n      ],\n      \"fieldConfig\": {\n        \"defaults\"\
+    : {\n          \"unit\": \"percent\",\n          \"decimals\": 2\n        },\n\
+    \        \"overrides\": []\n      },\n      \"options\": {\n        \"legend\"\
+    : {\n          \"displayMode\": \"list\",\n          \"placement\": \"bottom\"\
+    ,\n          \"calcs\": []\n        },\n        \"tooltip\": {\n          \"mode\"\
+    : \"single\",\n          \"sort\": \"none\"\n        }\n      }\n    },\n    {\n\
+    \      \"id\": 16,\n      \"type\": \"timeseries\",\n      \"title\": \"Control\
+    \ Plane RSS Memory Usage\",\n      \"datasource\": \"$datasource\",\n      \"\
+    gridPos\": {\n        \"h\": 8,\n        \"w\": 12,\n        \"x\": 12,\n    \
+    \    \"y\": 31\n      },\n      \"targets\": [\n        {\n          \"refId\"\
+    : \"A\",\n          \"expr\": \"sum(container_memory_rss{cluster=~\\\"$cluster\\\
+    \",pod=~\\\"ovnkube-master-.*|ovnkube-control-plane-.*\\\",namespace=\\\"openshift-ovn-kubernetes\\\
+    \",container!~\\\"POD|\\\"}) by (cluster, pod)\",\n          \"range\": true,\n\
+    \          \"legendFormat\": \"{{cluster}} {{pod}}\"\n        }\n      ],\n  \
+    \    \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\": \"bytes\"\
+    ,\n          \"decimals\": 2\n        },\n        \"overrides\": []\n      },\n\
+    \      \"options\": {\n        \"legend\": {\n          \"displayMode\": \"list\"\
+    ,\n          \"placement\": \"bottom\",\n          \"calcs\": []\n        },\n\
+    \        \"tooltip\": {\n          \"mode\": \"single\",\n          \"sort\":\
+    \ \"none\"\n        }\n      }\n    },\n    {\n      \"id\": 17,\n      \"type\"\
+    : \"row\",\n      \"title\": \"Worker Resources\",\n      \"gridPos\": {\n   \
+    \     \"h\": 1,\n        \"w\": 24,\n        \"x\": 0,\n        \"y\": 39\n  \
+    \    },\n      \"collapsed\": false,\n      \"panels\": []\n    },\n    {\n  \
+    \    \"id\": 18,\n      \"type\": \"timeseries\",\n      \"title\": \"Top 10 CPU\
+    \ Usage\",\n      \"datasource\": \"$datasource\",\n      \"gridPos\": {\n   \
+    \     \"h\": 8,\n        \"w\": 12,\n        \"x\": 0,\n        \"y\": 40\n  \
+    \    },\n      \"targets\": [\n        {\n          \"refId\": \"A\",\n      \
+    \    \"expr\": \"topk(10, irate(container_cpu_usage_seconds_total{cluster=~\\\"\
+    $cluster\\\",pod=~\\\"ovnkube-.*\\\",namespace=\\\"openshift-ovn-kubernetes\\\"\
+    ,container=\\\"ovn-controller\\\"}[10m]) * 100)\",\n          \"range\": true,\n\
+    \          \"legendFormat\": \"{{cluster}} {{pod}}\"\n        }\n      ],\n  \
+    \    \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\": \"percent\"\
+    ,\n          \"decimals\": 2\n        },\n        \"overrides\": []\n      },\n\
+    \      \"options\": {\n        \"legend\": {\n          \"displayMode\": \"list\"\
+    ,\n          \"placement\": \"bottom\",\n          \"calcs\": []\n        },\n\
+    \        \"tooltip\": {\n          \"mode\": \"single\",\n          \"sort\":\
+    \ \"none\"\n        }\n      }\n    },\n    {\n      \"id\": 19,\n      \"type\"\
+    : \"timeseries\",\n      \"title\": \"Top 10 RSS Memory Usage\",\n      \"datasource\"\
+    : \"$datasource\",\n      \"gridPos\": {\n        \"h\": 8,\n        \"w\": 12,\n\
+    \        \"x\": 12,\n        \"y\": 40\n      },\n      \"targets\": [\n     \
+    \   {\n          \"refId\": \"A\",\n          \"expr\": \"topk(10, sum(container_memory_rss{cluster=~\\\
+    \"$cluster\\\",pod=~\\\"ovnkube-node-.*\\\",namespace=\\\"openshift-ovn-kubernetes\\\
+    \",container=\\\"ovn-controller\\\"}) by (cluster, pod))\",\n          \"range\"\
+    : true,\n          \"legendFormat\": \"{{cluster}} {{pod}}\"\n        }\n    \
+    \  ],\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\":\
+    \ \"bytes\",\n          \"decimals\": 2\n        },\n        \"overrides\": []\n\
+    \      },\n      \"options\": {\n        \"legend\": {\n          \"displayMode\"\
+    : \"list\",\n          \"placement\": \"bottom\",\n          \"calcs\": []\n \
+    \       },\n        \"tooltip\": {\n          \"mode\": \"single\",\n        \
+    \  \"sort\": \"none\"\n        }\n      }\n    },\n    {\n      \"id\": 20,\n\
+    \      \"type\": \"timeseries\",\n      \"title\": \"Top 10 ovs-vswitchd CPU Usage\"\
+    ,\n      \"datasource\": \"$datasource\",\n      \"gridPos\": {\n        \"h\"\
+    : 8,\n        \"w\": 12,\n        \"x\": 0,\n        \"y\": 48\n      },\n   \
+    \   \"targets\": [\n        {\n          \"refId\": \"A\",\n          \"expr\"\
+    : \"topk(10, irate(container_cpu_usage_seconds_total{cluster=~\\\"$cluster\\\"\
+    ,id=\\\"/system.slice/ovs-vswitchd.service\\\"}[10m]) * 100)\",\n          \"range\"\
+    : true,\n          \"legendFormat\": \"{{cluster}} {{node}}\"\n        }\n   \
+    \   ],\n      \"fieldConfig\": {\n        \"defaults\": {\n          \"unit\"\
+    : \"percent\",\n          \"decimals\": 2\n        },\n        \"overrides\":\
+    \ []\n      },\n      \"options\": {\n        \"legend\": {\n          \"displayMode\"\
+    : \"list\",\n          \"placement\": \"bottom\",\n          \"calcs\": []\n \
+    \       },\n        \"tooltip\": {\n          \"mode\": \"single\",\n        \
+    \  \"sort\": \"none\"\n        }\n      }\n    },\n    {\n      \"id\": 21,\n\
+    \      \"type\": \"timeseries\",\n      \"title\": \"Top 10 ovs-vswitchd RSS Memory\
+    \ Usage\",\n      \"datasource\": \"$datasource\",\n      \"gridPos\": {\n   \
+    \     \"h\": 8,\n        \"w\": 12,\n        \"x\": 12,\n        \"y\": 48\n \
+    \     },\n      \"targets\": [\n        {\n          \"refId\": \"A\",\n     \
+    \     \"expr\": \"topk(10, sum(container_memory_rss{cluster=~\\\"$cluster\\\"\
+    ,id=\\\"/system.slice/ovs-vswitchd.service\\\"}) by (cluster, node))\",\n    \
+    \      \"range\": true,\n          \"legendFormat\": \"{{cluster}} {{node}}\"\n\
+    \        }\n      ],\n      \"fieldConfig\": {\n        \"defaults\": {\n    \
+    \      \"unit\": \"bytes\",\n          \"decimals\": 2\n        },\n        \"\
+    overrides\": []\n      },\n      \"options\": {\n        \"legend\": {\n     \
+    \     \"displayMode\": \"list\",\n          \"placement\": \"bottom\",\n     \
+    \     \"calcs\": []\n        },\n        \"tooltip\": {\n          \"mode\": \"\
+    single\",\n          \"sort\": \"none\"\n        }\n      }\n    }\n  ],\n  \"\
+    templating\": {\n    \"list\": [\n      {\n        \"current\": {\n          \"\
+    selected\": false,\n          \"text\": \"Observatorium\",\n          \"value\"\
+    : \"Observatorium\"\n        },\n        \"description\": null,\n        \"error\"\
+    : null,\n        \"hide\": 2,\n        \"includeAll\": false,\n        \"label\"\
+    : null,\n        \"multi\": false,\n        \"name\": \"datasource\",\n      \
+    \  \"options\": [],\n        \"query\": \"prometheus\",\n        \"refresh\":\
+    \ 2,\n        \"regex\": \"\",\n        \"skipUrlSync\": false,\n        \"type\"\
+    : \"datasource\"\n      },\n      {\n        \"allValue\": null,\n        \"current\"\
+    : {\n          \"selected\": false,\n          \"text\": \"name\",\n         \
+    \ \"value\": \"name\"\n        },\n        \"datasource\": null,\n        \"definition\"\
+    : \"label_values(acm_label_names, label_name)\",\n        \"description\": null,\n\
+    \        \"error\": null,\n        \"hide\": 0,\n        \"includeAll\": false,\n\
+    \        \"label\": \"Label\",\n        \"multi\": false,\n        \"name\": \"\
+    acm_label_names\",\n        \"options\": [],\n        \"query\": {\n         \
+    \ \"query\": \"label_values(acm_label_names, label_name)\",\n          \"refId\"\
+    : \"StandardVariableQuery\"\n        },\n        \"refresh\": 1,\n        \"regex\"\
+    : \"\",\n        \"skipUrlSync\": false,\n        \"sort\": 1,\n        \"type\"\
+    : \"query\"\n      },\n      {\n        \"allValue\": null,\n        \"current\"\
+    : {\n          \"selected\": false,\n          \"text\": \"All\",\n          \"\
+    value\": \"$__all\"\n        },\n        \"datasource\": null,\n        \"definition\"\
+    : \"label_values(acm_managed_cluster_labels, $acm_label_names)\",\n        \"\
+    description\": null,\n        \"error\": null,\n        \"hide\": 0,\n       \
+    \ \"includeAll\": true,\n        \"label\": \"Value\",\n        \"multi\": true,\n\
+    \        \"name\": \"value\",\n        \"options\": [],\n        \"query\": {\n\
+    \          \"query\": \"label_values(acm_managed_cluster_labels, $acm_label_names)\"\
+    ,\n          \"refId\": \"StandardVariableQuery\"\n        },\n        \"refresh\"\
+    : 1,\n        \"regex\": \"\",\n        \"skipUrlSync\": false,\n        \"sort\"\
+    : 0,\n        \"type\": \"query\"\n      },\n      {\n        \"allValue\": null,\n\
+    \        \"current\": {\n          \"selected\": true,\n          \"text\": [\n\
+    \            \"All\"\n          ],\n          \"value\": [\n            \"$__all\"\
+    \n          ]\n        },\n        \"datasource\": null,\n        \"definition\"\
+    : \"label_values(acm_managed_cluster_labels{$acm_label_names=~\\\"$value\\\"},\
+    \ name)\",\n        \"description\": null,\n        \"error\": null,\n       \
+    \ \"hide\": 2,\n        \"includeAll\": true,\n        \"label\": \"Cluster\"\
+    ,\n        \"multi\": true,\n        \"name\": \"cluster\",\n        \"options\"\
+    : [],\n        \"query\": {\n          \"query\": \"label_values(acm_managed_cluster_labels{$acm_label_names=~\\\
+    \"$value\\\"}, name)\",\n          \"refId\": \"StandardVariableQuery\"\n    \
+    \    },\n        \"refresh\": 1,\n        \"regex\": \"\",\n        \"skipUrlSync\"\
+    : false,\n        \"sort\": 0,\n        \"type\": \"query\"\n      }\n    ]\n\
+    \  },\n  \"style\": \"light\",\n  \"editable\": true,\n  \"annotations\": {\n\
+    \    \"list\": [\n      {\n        \"builtIn\": 1,\n        \"datasource\": \"\
+    -- Grafana --\",\n        \"enable\": true,\n        \"hide\": true,\n       \
+    \ \"iconColor\": \"rgba(0, 211, 255, 1)\",\n        \"name\": \"Annotations &\
+    \ Alerts\",\n        \"target\": {\n          \"limit\": 100,\n          \"matchAny\"\
+    : false,\n          \"tags\": [],\n          \"type\": \"dashboard\"\n       \
+    \ },\n        \"type\": \"dashboard\"\n      }\n    ]\n  }\n}"
