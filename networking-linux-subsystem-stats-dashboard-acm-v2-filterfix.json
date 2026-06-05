@@ -9,7 +9,7 @@
   ],
   "timezone": "browser",
   "schemaVersion": 36,
-  "version": 1,
+  "version": 2,
   "refresh": "30s",
   "time": {
     "from": "now-30m",
@@ -18,66 +18,109 @@
   "templating": {
     "list": [
       {
-        "name": "datasource",
-        "type": "datasource",
-        "query": "prometheus",
         "current": {
+          "selected": false,
           "text": "Observatorium",
           "value": "Observatorium"
         },
+        "description": null,
+        "error": null,
         "hide": 2,
-        "refresh": 1
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "datasource",
+        "options": [],
+        "query": "prometheus",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "type": "datasource"
       },
       {
-        "name": "acm_label_names",
-        "type": "query",
-        "label": "Label",
-        "datasource": "$datasource",
-        "query": "label_values(acm_label_names, label_name)",
-        "refresh": 1,
-        "sort": 1,
-        "multi": false,
-        "includeAll": false,
+        "allValue": null,
         "current": {
-          "selected": true,
+          "selected": false,
           "text": "name",
           "value": "name"
-        }
+        },
+        "datasource": null,
+        "definition": "label_values(acm_label_names, label_name)",
+        "description": null,
+        "error": null,
+        "hide": 0,
+        "includeAll": false,
+        "label": "Label",
+        "multi": false,
+        "name": "acm_label_names",
+        "options": [],
+        "query": {
+          "query": "label_values(acm_label_names, label_name)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
       },
       {
-        "name": "value",
-        "type": "query",
+        "allValue": null,
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": null,
+        "definition": "label_values(acm_managed_cluster_labels, $acm_label_names)",
+        "description": null,
+        "error": null,
+        "hide": 0,
+        "includeAll": true,
         "label": "Value",
-        "datasource": "$datasource",
-        "query": "label_values(acm_managed_cluster_labels, $acm_label_names)",
-        "refresh": 1,
-        "sort": 1,
         "multi": true,
-        "includeAll": true,
-        "allValue": ".*",
-        "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
-        }
+        "name": "value",
+        "options": [],
+        "query": {
+          "query": "label_values(acm_managed_cluster_labels, $acm_label_names)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
       },
       {
-        "name": "cluster",
-        "type": "query",
-        "label": "Cluster",
-        "datasource": "$datasource",
-        "query": "label_values(acm_managed_cluster_labels{$acm_label_names=~\"$value\"}, name)",
-        "refresh": 1,
-        "sort": 1,
-        "multi": true,
-        "includeAll": true,
-        "allValue": ".*",
-        "hide": 2,
+        "allValue": null,
         "current": {
           "selected": true,
-          "text": "All",
-          "value": "$__all"
-        }
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": null,
+        "definition": "label_values(acm_managed_cluster_labels{$acm_label_names=~\"$value\"}, name)",
+        "description": null,
+        "error": null,
+        "hide": 2,
+        "includeAll": true,
+        "label": "Cluster",
+        "multi": true,
+        "name": "cluster",
+        "options": [],
+        "query": {
+          "query": "label_values(acm_managed_cluster_labels{$acm_label_names=~\"$value\"}, name)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
       }
     ]
   },
@@ -618,5 +661,6 @@
         "overrides": []
       }
     }
-  ]
+  ],
+  "description": "ACM custom dashboard for OpenShift Networking / Linux Subsystem Stats, using ACM managed cluster label filters."
 }
